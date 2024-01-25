@@ -1,0 +1,23 @@
+# Database parameters
+DBNAME="[DBNAME]"
+DBUSER="[DBUSER]"
+DBPASS="[DBPASS]"
+DBHOST="[DBIP]"
+DBPORT="5432"
+
+# API parameters
+STATIC_API = "https://www.openstreetmap.org/api/0.6"
+OVERPASS_API = "https://lz4.overpass-api.de/api/interpreter"
+
+# Stage 1: railway catalogue
+ALL_RAILS_RELATION = 2332889
+
+# Stage 2: individual rails (aka ways)
+WAY_PROPS = [
+    "electrified",
+    "voltage",
+    "gauge",
+    "maxspeed",
+    "tracks",
+    "usage"
+]
