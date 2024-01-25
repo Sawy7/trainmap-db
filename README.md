@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS "osm_rails" (
 
 CREATE TABLE IF NOT EXISTS "processed_routes" (
     relcislo int PRIMARY KEY,
-    geom geometry('MULTILINESTRINGZ', 5514, 4),
+    geom geometry('MULTILINESTRINGZM', 5514, 4),
     CONSTRAINT fk_relcislo_pr
         FOREIGN KEY(relcislo)
             REFERENCES osm_data_index(relcislo)
@@ -159,7 +159,8 @@ CREATE OR REPLACE FUNCTION make_processed_route_line()
    LANGUAGE PLPGSQL
 AS $$
 BEGIN
-   	INSERT INTO processed_routes_line (relcislo, geom)
+	DELETE FROM processed_routes_line WHERE relcislo = new.relcislo;	
+	INSERT INTO processed_routes_line (relcislo, geom)
    	SELECT relcislo, ST_LineMerge(geom) AS geom
 	FROM processed_routes WHERE relcislo = new.relcislo;
 	RETURN NEW;
