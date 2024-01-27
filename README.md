@@ -336,6 +336,8 @@ python import-scripts/overpass/osm-overpass.py
 ### Import manuálně zpracovaných tratí
 Nyní je nutné importovat manuálně zpracované tratě (spojení dat SŽ a OSM). Jsou uloženy v zip souboru a níže je postup, jak je rovnou nahrát do databáze.
 
+**POZOR:** Import může být pomalejší, protože se při přidávání tratí zároveň probíhají triggery (pro konverzi a pro získání souhrných metadat) 
+
 ```console
 unzip raw-data/processed_routes.zip -d /tmp/
 chmod +x import-scripts/import-shapefile.sh
@@ -484,7 +486,17 @@ python cuzk-downloader.py
 chmod +x *.sh
 ./process_output.sh
 ./rasterize_processed.sh
-raster2pgsql -I -t 128x128 output/tiff/*.tiff public.dmr5g | psql -U postgres -d railway_mapdb -h localhost -p 5432 | grep -v INSERT
+# Jednoduchá varianta
+raster2pgsql -I -C -t 32x32 output/tiff/*.tiff public.dmr5g | psql -U postgres -d railway_mapdb -h localhost -p 5432 | grep -v INSERT
+# Varianta se skriptem využívajícím více vláken
+DBHOST=localhost DBPORT=5432 DBNAME=railway_mapdb_puretest DBUSER=postgres ./import_raster_threaded.sh
+```
+
+Pokud dojde k importu pomocí `threaded` skriptu, je nutné vytvořit index manuálně
+```sql
+CREATE INDEX ON "public"."dmr5g" USING gist (st_convexhull("rast"));
+ANALYZE "public"."dmr5g";
+SELECT AddRasterConstraints('public','dmr5g','rast',TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE);
 ```
 
 A nyní samotné pohledy.
