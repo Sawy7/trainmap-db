@@ -516,7 +516,10 @@ WITH points AS (
 			ST_Value(dmr5g.rast, trackp)
 		) Over(PARTITION BY relcislo ORDER BY points.index rows between 30 preceding and current row) AS rolling_z
 	FROM points
-	JOIN dmr5g ON ST_Intersects(dmr5g.rast, trackp)
+	JOIN dmr5g ON dmr5g.rid = (
+		SELECT MIN(rid) FROM dmr5g
+		WHERE ST_Intersects(dmr5g.rast, trackp)
+	)
 )
 SELECT relcislo, ST_Makeline(
 	ST_Translate(
@@ -545,7 +548,10 @@ WITH points AS (
 			ST_Value(dmr5g.rast, trackp5514)
 		) Over(PARTITION BY relcislo ORDER BY points.index rows between 30 preceding and current row) AS rolling_z
 	FROM points
-	JOIN dmr5g ON ST_Intersects(dmr5g.rast, trackp5514)
+	JOIN dmr5g ON dmr5g.rid = (
+		SELECT MIN(rid) FROM dmr5g
+		WHERE ST_Intersects(dmr5g.rast, trackp5514)
+	)
 )
 SELECT relcislo, ST_Makeline(
 	ST_Translate(
@@ -558,4 +564,5 @@ SELECT relcislo, ST_Makeline(
 ) AS geom
 FROM rolling
 GROUP BY relcislo;
+
 ```
