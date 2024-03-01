@@ -566,3 +566,33 @@ FROM rolling
 GROUP BY relcislo;
 
 ```
+
+### Nastavení správných práv pro tabulky a pohledy (specifické pro VŠB prod.)
+Nakonec je nutné nastavit správná práva pro tabulky a pohledy, aby bylo možné s nimi pracovat v aplikaci.
+
+```sql
+-- Tables
+ALTER TABLE all_stations OWNER TO railway_map;
+ALTER TABLE dmr5g OWNER TO railway_map;
+ALTER TABLE map_routes OWNER TO railway_map;
+ALTER TABLE osm_data_index OWNER TO railway_map;
+ALTER TABLE osm_rails OWNER TO railway_map;
+ALTER TABLE osm_ways OWNER TO railway_map;
+ALTER TABLE processed_routes OWNER TO railway_map;
+ALTER TABLE processed_routes_line OWNER TO railway_map;
+ALTER TABLE processed_routes_tags OWNER TO railway_map;
+ALTER TABLE users OWNER TO railway_map;
+ALTER TABLE users_confirmations OWNER TO railway_map;
+ALTER TABLE users_remembered OWNER TO railway_map;
+ALTER TABLE users_resets OWNER TO railway_map;
+ALTER TABLE users_throttling OWNER TO railway_map;
+
+-- Views
+ALTER VIEW even_processed_routes_line OWNER TO railway_map;
+ALTER VIEW even_station_relation OWNER TO railway_map;
+ALTER VIEW station_relation OWNER TO railway_map;
+
+-- Materialized views
+ALTER MATERIALIZED VIEW even_processed_routes_line_dmr OWNER TO railway_map;
+ALTER MATERIALIZED VIEW processed_routes_line_dmr OWNER TO railway_map;
+```
