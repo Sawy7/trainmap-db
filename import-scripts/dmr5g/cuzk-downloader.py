@@ -1,6 +1,7 @@
 import os.path
 import requests
 from xml.etree import ElementTree
+import sys
 
 # MAIN_URL = "https://atom.cuzk.cz/DMR5G-SJTSK/DMR5G-SJTSK.xml"
 MAIN_URL = "https://atom.cuzk.cz/DMR5G-SJTSK/OSD-DMR5G-SJTSK.xml"
@@ -70,8 +71,6 @@ if __name__ == "__main__":
         print("Building fragment file. This may take minutes.")
         parse_registry()
         print("Fragment file built. Press any key to start downloading...")
-    input()
+    if len(sys.argv) == 1 or sys.argv[1] != "-y":
+        input()
     download_fragments()
-
-
-    

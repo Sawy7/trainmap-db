@@ -1,0 +1,12 @@
+services:
+  postgis:
+    build: .
+    image: trainmap-db
+    container_name: trainmap-db
+    volumes:
+      - ./storage/postgis:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_PASSWORD=mysecretpassword
+    shm_size: '4gb'

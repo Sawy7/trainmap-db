@@ -29,3 +29,4 @@ for i in $(ls *.zip); do
     wait -n
   fi
 done
+wait

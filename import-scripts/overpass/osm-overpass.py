@@ -1,6 +1,7 @@
 import config
 import psycopg2
 import requests
+import sys
 
 class RailLine:
     def __init__(self):
@@ -353,7 +354,31 @@ class AllStations:
             print(f"Retrying 🔄")
             return self.run()
 
+def run_rails():
+    all_rails = AllRails()
+    all_rails.init_db()
+    all_rails.run()
+    all_rails.destroy()
+
+def run_ways():
+    all_ways = AllWays()
+    all_ways.init_db()
+    all_ways.run()
+    all_ways.destroy()
+
+def run_stations():
+    all_stations = AllStations()
+    all_stations.init_db()
+    all_stations.run()
+    all_stations.destroy()
+
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] in ["-a", "--all"]:
+        run_rails()
+        run_ways()
+        run_stations()
+        exit(0)
+
     print("🤖 What do you want to do? Please enter your choice and press enter:")
     print("  1️⃣  Download all railways in Czech Republic (numbered and catalogued) and save them to DB")
     print("  2️⃣  Download all ways in Czech Republic (individual rail pieces with metadata) and save them to DB")
@@ -367,20 +392,11 @@ if __name__ == "__main__":
     print()
 
     if choice == 1:
-        all_rails = AllRails()
-        all_rails.init_db()
-        all_rails.run()
-        all_rails.destroy()
+        run_rails()
     elif choice == 2:
-        all_ways = AllWays()
-        all_ways.init_db()
-        all_ways.run()
-        all_ways.destroy()
+        run_ways()
     elif choice == 3:
-        all_stations = AllStations()
-        all_stations.init_db()
-        all_stations.run()
-        all_stations.destroy()
+        run_stations()
     else:
         print("Invalid choice. Exiting...")
         exit(1)

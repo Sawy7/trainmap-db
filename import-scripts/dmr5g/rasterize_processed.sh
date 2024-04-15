@@ -9,7 +9,7 @@ rasterize() {
     echo "$filename rasterized"
 }
 
-N=12
+N=6
 cd output
 mkdir -p tiff
 for i in $(ls shp/*.shp); do
@@ -21,5 +21,4 @@ for i in $(ls shp/*.shp); do
     wait -n
   fi
 done
-
-# gdal_merge.py -o tiff/merged.tiff -co BIGTIFF=YES -co COMPRESS=DEFLATE tiff/*.tiff
+wait
