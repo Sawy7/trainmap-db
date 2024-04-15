@@ -1,3 +1,4 @@
+__pycache__
 config.py
 venv/
-__pycache__
+import-scripts/dmr5g/output

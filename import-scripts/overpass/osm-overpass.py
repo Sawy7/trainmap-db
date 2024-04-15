@@ -2,6 +2,7 @@ import config
 import psycopg2
 import requests
 import sys
+from tqdm import tqdm
 
 class RailLine:
     def __init__(self):
@@ -89,18 +90,16 @@ class AllRails:
 
     def run(self):
         # Getting the parent relation
+        print("Downloading all railways in CZ (this may take a while...) ⏳")
         parent = self.get_relation(config.ALL_RAILS_RELATION)
-        relation_len = len(parent["members"])
-        for i,e in enumerate(parent["members"]):
+        for i,e in enumerate(tqdm(parent["members"])):
             # Skip existing
             if self.check_if_index_exists(e["ref"]):
-                print(f"Skipping relation {e['ref']} ⏰")
                 continue
 
             # Skip abandoned
             ways = self.get_relation_ways(e["ref"])
             if "abandoned" in ways["tags"] and ways["tags"]["abandoned"] == "yes":
-                print(f"Skipping abandoned relation {e['ref']} 🏚️")
                 continue
 
             
@@ -115,7 +114,7 @@ class AllRails:
 
             # Final insert
             self.insert_rail(ways["tags"]["ref"], e["ref"], ways["tags"]["name"], multiline)
-            print(f"Rail {ways['tags']['ref']} ✅ ({i+1}/{relation_len})")
+        print("Done! ✅")
 
     def get_relation(self, id):
         response = requests.get(url=f"{config.STATIC_API}/relation/{id}.json")
@@ -203,7 +202,6 @@ class AllWays:
             );
             out geom;
         """
-        print(f"Downloading all rails in CZ (this may take a while...) ⏳")
         response = requests.post(url=config.OVERPASS_API, data=query)
         if response.status_code == 200:
             return response.json()["elements"]
@@ -247,18 +245,19 @@ class AllWays:
         cur.close()
 
     def run(self):
+        print(f"Downloading all ways in CZ (this may take a while...) ⏳")
         ways = self.get_all_ways()
-        way_count = len(ways)
         existing_way_ids = self.get_existing_way_ids()
         prepared_ways = []
-        for i,w in enumerate(ways):
+        print(f"Preparing for insert ⏳")
+        for w in tqdm(ways):
             if int(w["id"]) in existing_way_ids:
-                print(f"Skipping rail {w['id']} ⏰ ({i+1}/{way_count})")
                 continue
             prepared_ways.append(self.prepare_way(w))
-            print(f"Rail {w['id']} queued 🔜 ({i+1}/{way_count})")
-        print("Inserting queued rails ⬆️")
-        self.insert_multiple_ways(prepared_ways)
+        print(f"Inserting ⏳")
+        if len(prepared_ways) > 0:
+            self.insert_multiple_ways(prepared_ways)
+        print("Done! ✅")
 
 class AllStations:
     def __init__(self):
@@ -294,8 +293,9 @@ class AllStations:
 
     def parse_elements(self, elements):
         # NOTE: This could get more, if needed (probably mostly useless tags)
+        print(f"Parsing downloaded data ⏳")
         parsed = []
-        for e in elements:
+        for e in tqdm(elements):
             if "id" in e and "tags" in e and "name" in e["tags"]:
                 parsed.append({
                     "id": int(e["id"]),
@@ -310,6 +310,7 @@ class AllStations:
             if i > 0:
                 sql += ", "
             sql += f"({e['id']}, '{e['name']}', {e['geom']})"
+        sql += " ON CONFLICT (id) DO NOTHING"
         cur = self.conn.cursor()
         cur.execute(sql)
         self.conn.commit()
@@ -328,7 +329,8 @@ class AllStations:
         self.conn.commit()
         cur.close()
 
-    def run(self):   
+    def run(self):
+        print(f"Downloading stations/halts/stops in CZ (this may take a while...) ⏳")
         query = f"""
             [out:json];
             area[admin_level=2]["ISO3166-1"="CZ"]->.country;
@@ -342,17 +344,17 @@ class AllStations:
             );
             out;
         """
-        print(f"Downloading all stations in CZ (this may take a while...) ⏳")
         response = requests.post(url=config.OVERPASS_API, data=query)
         if response.status_code == 200:
             elements = response.json()["elements"]
             parsed_elements = self.parse_elements(elements)
-            print("Inserting queued stations ⬆️")
+            print("Inserting queued stations ⏳️")
             self.insert_multiple_stations(parsed_elements)
             self.delete_duplicates()
         else:
             print(f"Retrying 🔄")
             return self.run()
+        print("Done! ✅")
 
 def run_rails():
     all_rails = AllRails()

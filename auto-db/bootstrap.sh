@@ -1,4 +1,6 @@
 #!/bin/sh
+set -e
+
 # Create the database
 psql -U postgres -c "CREATE DATABASE railway_mapdb WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE = 'en_US.utf8';"
 cat ./stage1.sql | psql -U postgres -d railway_mapdb

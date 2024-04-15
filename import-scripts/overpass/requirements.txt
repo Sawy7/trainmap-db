@@ -1,2 +1,4 @@
 osm2geojson==0.2.5
 psycopg2-binary==2.9.9
+tqdm==4.66.2
+requests-futures==1.0.1

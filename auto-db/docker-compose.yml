@@ -5,6 +5,7 @@ services:
     container_name: trainmap-db
     volumes:
       - ./storage/postgis:/var/lib/postgresql/data
+      - ./storage/data:/data
     ports:
       - '5432:5432'
     environment:
