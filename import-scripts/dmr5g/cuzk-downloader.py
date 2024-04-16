@@ -8,7 +8,7 @@ from concurrent.futures import as_completed
 from xml.etree import ElementTree
 import sys
 from tqdm import tqdm
-import time
+from itertools import islice
 
 # MAIN_URL = "https://atom.cuzk.cz/DMR5G-SJTSK/DMR5G-SJTSK.xml"
 MAIN_URL = "https://atom.cuzk.cz/DMR5G-SJTSK/OSD-DMR5G-SJTSK.xml"
@@ -68,22 +68,38 @@ def download_fragments():
     future_session = FuturesSession(session=session)
     print("Downloading all the individual fragments (this may take a while...) ⏳️")
     with open(FRAGMENT_FILE, "r") as frag_f:
-        futures = [future_session.get(l.strip()) for l in frag_f.readlines()]
-        with tqdm(total=len(futures)) as pbar:
-            for future in as_completed(futures):
-                try:
-                    response = future.result()
-                except MaxRetryError:
-                    print("Error: Could not download the fragment (Max retries exceeded)")
-                    exit(1)
-                filename = response.request.url.split("/")[-1]
-                filepath = os.path.join(FRAGMENT_OUTPUT_DIR, filename)
-                if response.status_code != 200:
-                    print("Error: Could not get the data registry")
-                    exit(1)
-                with open(filepath, "wb") as output_f:
-                    output_f.write(response.content)
-                pbar.update(1)
+        all_urls = [l.strip() for l in frag_f.readlines()]
+        with tqdm(total=len(all_urls)) as pbar:
+            iter_urls = iter(all_urls)
+            while True:
+                url_chunk = list(islice(iter_urls, 100))
+                if not url_chunk:
+                    break
+                url_chunk_new = []
+                for url in url_chunk:
+                    filename = url.split("/")[-1]
+                    filepath = os.path.join(FRAGMENT_OUTPUT_DIR, filename)
+                    if os.path.isfile(filepath):
+                        pbar.update(1)
+                    else:
+                        url_chunk_new.append(url)
+                if not url_chunk_new:
+                    continue
+                futures = [future_session.get(url) for url in url_chunk_new]
+                for future in as_completed(futures):
+                    try:
+                        response = future.result()
+                    except MaxRetryError:
+                        print("Error: Could not download the fragment (Max retries exceeded)")
+                        exit(1)
+                    filename = response.request.url.split("/")[-1]
+                    filepath = os.path.join(FRAGMENT_OUTPUT_DIR, filename)
+                    if response.status_code != 200:
+                        print("Error: Could not get the data registry")
+                        exit(1)
+                    with open(filepath, "wb") as output_f:
+                        output_f.write(response.content)
+                    pbar.update(1)
 
 if __name__ == "__main__":
     if os.path.isfile(FRAGMENT_FILE):

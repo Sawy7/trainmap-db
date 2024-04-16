@@ -9,7 +9,7 @@ rasterize() {
     echo "$filename rasterized"
 }
 
-N=6
+N=$(nproc)
 cd output
 mkdir -p tiff
 for i in $(ls shp/*.shp); do

@@ -14,7 +14,7 @@ process_zip(){
 }
 
 dmrtemp="/tmp/dmrtemp"
-N=6
+N=$(nproc)
 rm -rf "$dmrtemp"
 mkdir -p "$dmrtemp"
 cd output

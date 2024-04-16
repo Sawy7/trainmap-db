@@ -1,5 +1,5 @@
 services:
-  postgis:
+  db:
     build: .
     image: trainmap-db
     container_name: trainmap-db

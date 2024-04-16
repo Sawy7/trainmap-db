@@ -19,7 +19,7 @@ shp2pgsql \
 
 # Setup python venv
 python3 -m venv venv
-./venv/bin/pip install -r ./import-scripts/overpass/requirements.txt
+./venv/bin/pip install -r ./import-scripts/requirements.txt
 
 # Download OSM data
 cd ./import-scripts/overpass
@@ -59,3 +59,6 @@ cd /data
 
 # Create some more views
 cat ./stage3.sql | psql -U postgres -d railway_mapdb
+
+# Remove Python venv
+rm -rf ./venv
