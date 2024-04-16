@@ -43,6 +43,9 @@ shp2pgsql \
   processed_routes 2> /dev/null \
   | psql -U postgres -d railway_mapdb
 
+# Remove extracted raw data
+rm raw-data/*.dbf raw-data/*.prj raw-data/*.shp raw-data/*.shx raw-data/*.cpg raw-data/*.qmd
+
 # Create some views
 cat ./stage2.sql | psql -U postgres -d railway_mapdb
 
@@ -62,3 +65,6 @@ cat ./stage3.sql | psql -U postgres -d railway_mapdb
 
 # Remove Python venv
 rm -rf ./venv
+
+# Remove downloaded DMR 5G (assuming everything went well and rasters are in the DB now)
+rm -rf import-scripts/dmr5g/output
