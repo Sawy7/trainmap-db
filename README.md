@@ -7,8 +7,8 @@ Pro vytvoření čerstvé kopie databáze, tzv. *from scratch* byl připraven Do
 ### Postup
 
 ```console
-git clone https://gitlab.vsb.cz/centrum-enet-inf/enet-sz-mapdb.git
-cd auto-db
+git clone https://github.com/Sawy7/trainmap-db
+cd trainmap-db/auto-db
 chmod +x *.sh
 ./create.sh
 sudo docker exec -it trainmap-db /data/bootstrap.sh
